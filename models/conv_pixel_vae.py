@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow.contrib.framework.python.ops import arg_scope, add_arg_scope
 from blocks.layers import conv2d, deconv2d, dense
 from blocks.samplers import gaussian_sampler, mix_logistic_sampler
-from blocks.estimators import estimate_mi_tc_dwkld, estimate_mmd, compute_gaussian_kld
+from blocks.estimators import estimate_mi_tc_dwkld, estimate_mmd, compute_gaussian_kld, estimate_mmdtc
 from blocks.losses import mix_logistic_loss
 from blocks.helpers import int_shape, broadcast_masks_tf
 from blocks.components import conv_encoder_64_medium, conv_decoder_64_medium, conv_encoder_32_medium, conv_decoder_32_medium, conv_encoder_32_large, conv_decoder_32_large, conv_encoder_32_large1, conv_decoder_32_large1
@@ -16,7 +16,7 @@ class ConvPixelVAE(object):
     def __init__(self, counters={}):
         self.counters = counters
 
-    def build_graph(self, x, x_bar, is_training, dropout_p, z_dim, masks=None, input_masks=None, use_mode="test", network_size="medium", reg='mmd', N=2e5, sample_range=1.0, beta=1., lam=0., nonlinearity=tf.nn.elu, bn=True, kernel_initializer=None, kernel_regularizer=None, nr_resnet=1, nr_filters=100, nr_logistic_mix=10):
+    def build_graph(self, x, x_bar, is_training, dropout_p, z_dim, masks=None, input_masks=None, use_mode="test", random_indices=None, network_size="medium", reg='mmd', N=2e5, sample_range=1.0, beta=1., lam=0., nonlinearity=tf.nn.elu, bn=True, kernel_initializer=None, kernel_regularizer=None, nr_resnet=1, nr_filters=100, nr_logistic_mix=10):
         self.z_dim = z_dim
         self.use_mode = use_mode
         self.nonlinearity = nonlinearity
@@ -31,6 +31,7 @@ class ConvPixelVAE(object):
         self.nr_resnet = nr_resnet
         self.nr_filters = nr_filters
         self.nr_logistic_mix = nr_logistic_mix
+        self.random_indices = random_indices ###
         self.__model(x, x_bar, is_training, dropout_p, masks, input_masks, network_size=network_size)
         self.__loss(self.reg)
 
@@ -61,6 +62,7 @@ class ConvPixelVAE(object):
             inputs = self.x
             if self.input_masks is not None:
                 inputs = inputs * broadcast_masks_tf(self.input_masks, num_channels=3)
+                inputs += tf.random_uniform(int_shape(inputs), -1, 1) * (1-broadcast_masks_tf(self.input_masks, num_channels=3))
                 inputs = tf.concat([inputs, broadcast_masks_tf(self.input_masks, num_channels=1)], axis=-1)
             self.z_mu, self.z_log_sigma_sq = conv_encoder(inputs, self.z_dim)
             sigma = tf.exp(self.z_log_sigma_sq / 2.)
@@ -75,6 +77,8 @@ class ConvPixelVAE(object):
             else:
                 self.encoded_context = context_encoder(self.x, self.masks, bn=False, nr_resnet=self.nr_resnet, nr_filters=self.nr_filters)
                 sh = tf.concat([self.decoded_features, self.encoded_context], axis=-1)
+                if self.input_masks is not None:
+                    sh = tf.concat([broadcast_masks_tf(self.input_masks, num_channels=1), sh], axis=-1)
             self.mix_logistic_params = cond_pixel_cnn(self.x_bar, sh=sh, bn=False, dropout_p=self.dropout_p, nr_resnet=self.nr_resnet, nr_filters=self.nr_filters, nr_logistic_mix=self.nr_logistic_mix)
             self.x_hat = mix_logistic_sampler(self.mix_logistic_params, nr_logistic_mix=self.nr_logistic_mix, sample_range=self.sample_range, counters=self.counters)
 
@@ -84,6 +88,7 @@ class ConvPixelVAE(object):
         print("******   Compute Loss   ******")
         self.mmd, self.kld, self.mi, self.tc, self.dwkld = [None for i in range(5)]
         self.gamma, self.dwmmd = 1e3, None ## hard coded, experimental
+        self.mmdtc = None
         self.loss_ae = mix_logistic_loss(self.x, self.mix_logistic_params, masks=self.masks)
         if reg is None:
             self.loss_reg = 0
@@ -97,14 +102,17 @@ class ConvPixelVAE(object):
         elif reg=='tc':
             self.mi, self.tc, self.dwkld = estimate_mi_tc_dwkld(self.z, self.z_mu, self.z_log_sigma_sq, N=self.N)
             self.loss_reg = self.mi + self.beta * self.tc + self.dwkld
+        elif reg=='info-tc':
+            self.mi, self.tc, self.dwkld = estimate_mi_tc_dwkld(self.z, self.z_mu, self.z_log_sigma_sq, N=self.N)
+            self.loss_reg = self.beta * self.tc + self.dwkld
         elif reg=='tc-dwmmd':
             self.mi, self.tc, self.dwkld = estimate_mi_tc_dwkld(self.z, self.z_mu, self.z_log_sigma_sq, N=self.N)
             self.dwmmd = estimate_mmd(tf.random_normal(int_shape(self.z)), self.z, is_dimention_wise=True)
             self.loss_reg = self.beta * self.tc + self.dwmmd * self.gamma
         elif reg=='mmd-tc':
             self.mmd = estimate_mmd(tf.random_normal(int_shape(self.z)), self.z)
-            self.mi, self.tc, self.dwkld = estimate_mi_tc_dwkld(self.z, self.z_mu, self.z_log_sigma_sq, N=self.N)
-            self.loss_reg = self.beta * self.tc + self.mmd * 1e5
+            self.mmdtc = estimate_mmdtc(self.z, self.random_indices)
+            self.loss_reg =  (self.mmd + self.beta * self.mmdtc) * 1e5
 
         print("reg:{0}, beta:{1}, lam:{2}".format(self.reg, self.beta, self.lam))
         self.loss = self.loss_ae + self.loss_reg

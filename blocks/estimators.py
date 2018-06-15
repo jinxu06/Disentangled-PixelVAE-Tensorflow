@@ -36,6 +36,16 @@ def estimate_mmd(x, y, is_dimention_wise=False):
     mmd = tf.reduce_mean(x_kernel) + tf.reduce_mean(y_kernel) - 2 * tf.reduce_mean(xy_kernel)
     return mmd
 
+def estimate_mmdtc(y, indices):
+    batch_size, z_dim = int_shape(y)
+    batch_size = batch_size // 2
+    x, y = y[:batch_size], y[batch_size:]
+    ys = tf.unstack(y, axis=1)
+    for i in range(z_dim):
+        ys[i] = tf.gather(ys[i], indices[:, i])
+    y = tf.stack(ys, axis=1)
+    return estimate_mmd(x, y)
+
 def estimate_log_probs(z, z_mu, z_log_sigma_sq, N=200000):
     z_sigma = tf.sqrt(tf.exp(z_log_sigma_sq))
     log_probs = []

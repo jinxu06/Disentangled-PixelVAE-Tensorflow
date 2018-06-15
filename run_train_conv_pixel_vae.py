@@ -9,7 +9,8 @@ from blocks.helpers import Recorder, visualize_samples, get_nonlinearity, int_sh
 from blocks.optimizers import adam_updates
 import data.load_data as load_data
 from models.conv_pixel_vae import ConvPixelVAE
-from masks import RandomRectangleMaskGenerator, RectangleMaskGenerator, CenterMaskGenerator
+from masks import RandomRectangleMaskGenerator, RectangleMaskGenerator, CenterMaskGenerator, get_generator
+from configs import get_config
 
 parser = argparse.ArgumentParser()
 
@@ -29,252 +30,79 @@ cfg_default = {
 }
 
 
-# cfg = cfg_default
-# cfg.update({
-#     "img_size": 32,
-#     "data_set": "celeba32",
-#     "z_dim": 32,
-#     "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z32_mmd",
-#     "beta": 1e5,
-#     "reg": "mmd",
-#     "use_mode": "train",
-#     "mask_type": "full",
-#     "batch_size": 64,
-#     "network_size": "medium",
-#     "masked": False,
-# })
-
-# cfg = cfg_default
-# cfg.update({
-#     "img_size": 32,
-#     "data_set": "celeba32",
-#     "z_dim": 32,
-#     "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z32_mmd_large1",
-#     "beta": 1e5,
-#     "reg": "mmd",
-#     "use_mode": "train",
-#     "mask_type": "full",
-#     "batch_size": 64,
-#     "network_size": "large1",
-#     "masked": False,
-# })
-
-# cfg = cfg_default
-# cfg.update({
-#     "img_size": 32,
-#     "data_set": "celeba32",
-#     "z_dim": 32,
-#     "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z32_mmd_large1_mask",
-#     "beta": 1e5,
-#     "reg": "mmd",
-#     "use_mode": "train",
-#     "mask_type": "random rec",
-#     "batch_size": 64,
-#     "network_size": "large1",
-#     "masked": True,
-# })
-#
-# cfg = cfg_default
-# cfg.update({
-#     "img_size": 32,
-#     "data_set": "celeba32",
-#     "z_dim": 32,
-#     "save_dir": "/data/ziz/jxu/models/pvae_celeba32_tc-dwmmd_medium",
-#     "beta": 5,
-#     "reg": "tc-dwmmd",
-#     "use_mode": "train",
-#     "mask_type": "full",
-#     "batch_size": 64,
-#     "network_size": "medium",
-#     "masked": False,
-# })
-
-# 01
-# cfg = cfg_default
-# cfg.update({
-#     "img_size": 32,
-#     "data_set": "celeba32",
-#     "z_dim": 24,
-#     "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z32_mmd_medium_01",
-#     "beta": 1e5,
-#     "reg": "mmd",
-#     "use_mode": "train",
-#     "mask_type": "full",
-#     "batch_size": 64,
-#     "network_size": "medium",
-#     "masked": False,
-# })
-
-# 01
-# cfg = cfg_default
-# cfg.update({
-#     "img_size": 32,
-#     "data_set": "celeba32",
-#     "z_dim": 24,
-#     "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z24_mmd_large_01",
-#     "beta": 5e5,
-#     "reg": "mmd",
-#     "use_mode": "train",
-#     "mask_type": "full",
-#     "batch_size": 64,
-#     "network_size": "large",
-#     "masked": False,
-# })
-
-# # 02
-# cfg = cfg_default
-# cfg.update({
-#     "img_size": 32,
-#     "data_set": "celeba32",
-#     "z_dim": 24,
-#     "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z24_mmd_large_02",
-#     "beta": 1e6,
-#     "reg": "mmd",
-#     "use_mode": "train",
-#     "mask_type": "full",
-#     "batch_size": 64,
-#     "network_size": "large",
-#     "masked": False,
-# })
-#
-# # 03
-# cfg = cfg_default
-# cfg.update({
-#     "img_size": 32,
-#     "data_set": "celeba32",
-#     "z_dim": 24,
-#     "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z24_mmd_large1_03",
-#     "beta": 5e5,
-#     "reg": "mmd",
-#     "use_mode": "train",
-#     "mask_type": "full",
-#     "batch_size": 64,
-#     "network_size": "large1",
-#     "masked": False,
-# })
-
-# cfg = cfg_default
-# cfg.update({
-#     "img_size": 32,
-#     "data_set": "celeba32",
-#     "z_dim": 24,
-#     "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z24_mmd-tc",
-#     "beta": 5,
-#     "reg": "mmd-tc",
-#     "use_mode": "train",
-#     "mask_type": "full",
-#     "batch_size": 64,
-#     "network_size": "medium",
-#     "masked": False,
-# })
-
-
-
-
-cfg = cfg_default
-cfg.update({
-    "img_size": 32,
-    "data_set": "celeba32",
-    "z_dim": 24,
-    "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z24_mmd_large1_elu_3",
-    "beta": 3e5,
-    "reg": "mmd",
-    "use_mode": "train",
-    "mask_type": "full",
-    "batch_size": 64,
-    "network_size": "large1",
-    "masked": False,
-    "nonlinearity": "elu",
-})
-
-cfg = cfg_default
-cfg.update({
-    "img_size": 32,
-    "data_set": "celeba32",
-    "z_dim": 24,
-    "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z24_mmd_large1_elu_7",
-    "beta": 7e5,
-    "reg": "mmd",
-    "use_mode": "train",
-    "mask_type": "full",
-    "batch_size": 64,
-    "network_size": "large1",
-    "masked": False,
-    "nonlinearity": "elu",
-})
-
-
-cfg = cfg_default
-cfg.update({
-    "img_size": 32,
-    "data_set": "celeba32",
-    "z_dim": 32,
-    "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z32_mmd_medium_elu_5",
-    "beta": 5e5,
-    "reg": "mmd",
-    "use_mode": "train",
-    "mask_type": "full",
-    "batch_size": 64,
-    "network_size": "medium",
-    "masked": False,
-    "nonlinearity": "elu",
-    "use_input_masks": False,
-})
-
 #################
 
 ## MMD (Masking)
 
-cfg = cfg_default
-cfg.update({
-    "img_size": 32,
-    "data_set": "celeba32",
-    "z_dim": 32,
-    "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z32_mmd_medium_elu_5",
-    "beta": 5e5,
-    "reg": "mmd",
-    "use_mode": "train",
-    "mask_type": "full",
-    "batch_size": 64,
-    "network_size": "medium",
-    "masked": False,
-    "nonlinearity": "elu",
-    "use_input_masks": True,
-})
-
-cfg = cfg_default
-cfg.update({
-    "img_size": 32,
-    "data_set": "celeba32",
-    "z_dim": 32,
-    "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z32_mmd_large1_elu_5",
-    "beta": 5e5,
-    "reg": "mmd",
-    "use_mode": "train",
-    "mask_type": "full",
-    "batch_size": 64,
-    "network_size": "large1",
-    "masked": False,
-    "nonlinearity": "elu",
-    "use_input_masks": True,
-})
-
-cfg = cfg_default
-cfg.update({
-    "img_size": 32,
-    "data_set": "celeba32",
-    "z_dim": 24,
-    "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z24_mmd_large1_elu_5_mask",
-    "beta": 5e5,
-    "reg": "mmd",
-    "use_mode": "train",
-    "mask_type": "full",
-    "batch_size": 64,
-    "network_size": "large1",
-    "masked": False,
-    "nonlinearity": "elu",
-    "use_input_masks": True,
-})
+# cfg = cfg_default
+# cfg.update({
+#     "img_size": 32,
+#     "data_set": "celeba32",
+#     "z_dim": 32,
+#     "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z32_mmd_medium_elu_5",
+#     "beta": 5e5,
+#     "reg": "mmd",
+#     "use_mode": "train",
+#     "mask_type": "full",
+#     "batch_size": 64,
+#     "network_size": "medium",
+#     "masked": False,
+#     "nonlinearity": "elu",
+#     "use_input_masks": True,
+# })
+#
+#
+# cfg = cfg_default
+# cfg.update({
+#     "img_size": 32,
+#     "data_set": "celeba32",
+#     "z_dim": 32,
+#     "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z32_mmd_medium_elu5_masking",
+#     "beta": 5e5,
+#     "reg": "mmd",
+#     "use_mode": "train",
+#     "mask_type": "full",
+#     "batch_size": 64,
+#     "network_size": "medium",
+#     "masked": False,
+#     "nonlinearity": "elu",
+#     "use_input_masks": True,
+# })
+#
+# cfg = cfg_default
+# cfg.update({
+#     "img_size": 32,
+#     "data_set": "celeba32",
+#     "z_dim": 32,
+#     "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z32_mmd_medium_elu5_noise",
+#     "beta": 5e5,
+#     "reg": "mmd",
+#     "use_mode": "train",
+#     "mask_type": "full",
+#     "batch_size": 64,
+#     "network_size": "medium",
+#     "masked": False,
+#     "nonlinearity": "elu",
+#     "use_input_masks": True,
+# })
+#
+# ## masked
+# cfg = cfg_default.copy()
+# cfg.update({
+#     "img_size": 32,
+#     "data_set": "celeba32",
+#     "z_dim": 32,
+#     "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z32_mmd_medium_elu5_noise_masked",
+#     "beta": 5e5,
+#     "reg": "mmd",
+#     "use_mode": "train",
+#     "mask_type": "full",
+#     "batch_size": 64,
+#     "network_size": "medium",
+#     "masked": True,
+#     "nonlinearity": "elu",
+#     "use_input_masks": True,
+# })
 
 ## KLD
 
@@ -286,10 +114,152 @@ cfg.update({
 
 ##################
 
+# cfg = cfg_default.copy()
+# cfg.update({
+#     "img_size": 32,
+#     "data_set": "svhn",
+#     "data_dir": "/data/ziz/not-backed-up/jxu/SVHN",
+#     "z_dim": 32,
+#     "save_dir": "/data/ziz/jxu/models/pvae_svhn_z32_mmd_medium_elu5_noise",
+#     "beta": 5e5,
+#     "reg": "mmd",
+#     "use_mode": "train",
+#     "mask_type": "full",
+#     "batch_size": 64,
+#     "network_size": "medium",
+#     "masked": False,
+#     "nonlinearity": "elu",
+#     "use_input_masks": True,
+# })
 
 
+# cfg = cfg_default.copy()
+# cfg.update({
+#     "img_size": 32,
+#     "data_set": "celeba32",
+#     "z_dim": 32,
+#     "save_dir": "/data/ziz/jxu/models/pvae_celeba32_z32_mmd_medium_elu5_noise_inpainting",
+#     "beta": 5e5,
+#     "reg": "mmd",
+#     "use_mode": "train",
+#     "mask_type": "random rec",
+#     "batch_size": 64,
+#     "network_size": "medium",
+#     "nonlinearity": "elu",
+#     "phase": "context-mask", # "pixelvae", "pixelvae-mask", "context", "context-mask"
+#     "load_dir": "/data/ziz/jxu/models/pvae_celeba32_z32_mmd_medium_elu5_noise",
+# })
+
+# cfg = cfg_default.copy()
+# cfg.update({
+#     "img_size": 32,
+#     "data_set": "svhn",
+#     "data_dir": "/data/ziz/not-backed-up/jxu/SVHN",
+#     "z_dim": 32,
+#     "save_dir": "/data/ziz/jxu/models/pvae_svhn_z32_mmd_medium_elu5_noise",
+#     "beta": 5e5,
+#     "reg": "mmd",
+#     "use_mode": "train",
+#     "mask_type": "full",
+#     "batch_size": 64,
+#     "network_size": "medium",
+#     "nonlinearity": "elu",
+#     "phase": "pixelvae-mask", # "pixelvae", "pixelvae-mask", "context", "context-mask"
+#     #"load_dir": "/data/ziz/jxu/models/pvae_celeba32_z32_mmd_medium_elu5_noise",
+# })
 
 
+# # double check mmd
+# config = {"nonlinearity": "elu"}
+# cfg = get_config(config=config, name=None, suffix="_double_check", load_dir=None, dataset='celeba', size=32, mode='train', phase='ce', use_mask_for="input output")
+
+# # kld
+# config = {"nonlinearity": "elu", "nr_resnet":1, "reg":'kld', "beta":1.0}
+# cfg = get_config(config=config, name=None, suffix="", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
+
+# # tc
+# config = {"nonlinearity": "elu", "nr_resnet":1, "reg":"tc", "beta":5.0}
+# cfg = get_config(config=config, name=None, suffix="", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
+
+
+# # # large network, bn before nonlinearity, beta 1d5
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":1e5}
+# cfg = get_config(config=config, name=None, suffix="_large", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
+
+# # large network, bn before nonlinearity, beta 5e5
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":5e5}
+# cfg = get_config(config=config, name=None, suffix="_large", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
+
+# # large network, bn before nonlinearity, beta 1e6
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":1e6}
+# cfg = get_config(config=config, name=None, suffix="_large", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
+
+# # # large network, mmd-tc
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":5, 'reg':'mmd-tc'}
+# cfg = get_config(config=config, name=None, suffix="_test", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
+
+
+# ## ce phase, beta 5e5
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":5e5}
+# load_dir = "/data/ziz/jxu/save_dirs/checkpoints_celeba32_32_mmd_500000.0_5_pvae_large"
+# cfg = get_config(config=config, name=None, suffix="_large", load_dir=load_dir, dataset='celeba', size=32, mode='train', phase='ce', use_mask_for="input output")
+
+# # # large network, mmd-tc, beta 0.1
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":0.1, 'reg':'mmd-tc'}
+# cfg = get_config(config=config, name=None, suffix="_test", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
+
+# # large network, bn before nonlinearity, beta 1e6, nr_resnet 3
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":1e6, "nr_resnet":3}
+# cfg = get_config(config=config, name=None, suffix="_large", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
+
+# # large network, bn before nonlinearity, beta 5e6, nr_resnet 5
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":5e6, "nr_resnet":5}
+# cfg = get_config(config=config, name=None, suffix="_large", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
+
+# # large network, bn before nonlinearity, beta 2e6, nr_resnet 5
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":2e6, "nr_resnet":5}
+# cfg = get_config(config=config, name=None, suffix="_large", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
+
+# # large network, bn before nonlinearity, beta 1.5*1e6, nr_resnet 5
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":1.5*1e6, "nr_resnet":5}
+# cfg = get_config(config=config, name=None, suffix="_large", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
+
+# # large network, bn before nonlinearity, beta 1.5*1e6, nr_resnet 5
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":1.5*1e6, "nr_resnet":5}
+# load_dir = "/data/ziz/jxu/save_dirs/checkpoints_celeba32_32_mmd_1500000.0_5_pvae_large"
+# cfg = get_config(config=config, name=None, suffix="_large", load_dir=load_dir, dataset='celeba', size=32, mode='train', phase='ce', use_mask_for="input output")
+#
+
+# # large network, bn before nonlinearity, beta 2e6, nr_resnet 5, ce phase
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":2e6, "nr_resnet":5, "learning_rate":0.0001}
+# load_dir = "/data/ziz/jxu/save_dirs/checkpoints_celeba32_32_mmd_2000000.0_5_pvae_large"
+# cfg = get_config(config=config, name=None, suffix="_large", load_dir=load_dir, dataset='celeba', size=32, mode='train', phase='ce', use_mask_for="input output")
+
+# # large network, bn before nonlinearity, beta 2e6, nr_resnet 5, ce phase
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":2e6, "nr_resnet":5, "learning_rate":0.00001}
+# load_dir = "/data/ziz/jxu/save_dirs/checkpoints_celeba32_32_mmd_2000000.0_5_pvae_large"
+# cfg = get_config(config=config, name=None, suffix="_large_1", load_dir=load_dir, dataset='celeba', size=32, mode='train', phase='ce', use_mask_for="input output")
+
+
+# # kld, large network, bn before nonlinearity nr_resnet 1
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":1.0, "nr_resnet":1, "reg":"kld"}
+# cfg = get_config(config=config, name=None, suffix="_large", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
+
+# # tc, beta 5, large network, bn before nonlinearity nr_resnet 1
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":5.0, "nr_resnet":1, "reg":"tc"}
+# cfg = get_config(config=config, name=None, suffix="_large", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
+
+# # info-tc, beta 5, large network, bn before nonlinearity nr_resnet 1
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":5.0, "nr_resnet":1, "reg":"info-tc"}
+# cfg = get_config(config=config, name=None, suffix="_large", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
+
+# # kld, large network, bn before nonlinearity nr_resnet 5
+# config = {"nonlinearity": "elu", "network_size":"large", "beta":1.0, "nr_resnet":5, "reg":"kld"}
+# cfg = get_config(config=config, name=None, suffix="_large", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
+
+# large network, bn before nonlinearity, beta 2e6, nr_resnet 5, no inputs uniform noise
+config = {"nonlinearity": "elu", "network_size":"large", "beta":2e6, "nr_resnet":5}
+cfg = get_config(config=config, name=None, suffix="_large_nonoise", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="input output")
 
 
 parser.add_argument('-is', '--img_size', type=int, default=cfg['img_size'], help="size of input image")
@@ -315,11 +285,14 @@ parser.add_argument('-sr', '--sample_range', type=float, default=cfg['sample_ran
 parser.add_argument('-s', '--seed', type=int, default=1, help='Random seed to use')
 # new features
 parser.add_argument('-d', '--debug', dest='debug', action='store_true', help='Under debug mode?')
-parser.add_argument('-um', '--use_mode', type=str, default=cfg['use_mode'], help='')
-parser.add_argument('-mt', '--mask_type', type=str, default=cfg['mask_type'], help='')
+parser.add_argument('-um', '--mode', type=str, default=cfg['mode'], help='')
+parser.add_argument('-umf', '--use_mask_for', type=str, default=cfg['use_mask_for'], help='')
+parser.add_argument('-ns', '--network_size', type=str, default=cfg['network_size'], help='')
+parser.add_argument('-ld', '--load_dir', type=str, default=cfg['load_dir'], help='')
+parser.add_argument('-p', '--phase', type=str, default=cfg['phase'], help='')
 
 args = parser.parse_args()
-if args.use_mode == 'test':
+if args.mode == 'test':
     args.debug = True
 
 args.nr_gpu = len(args.gpus.split(","))
@@ -330,37 +303,27 @@ if not os.path.exists(args.save_dir):
 
 tf.set_random_seed(args.seed)
 batch_size = args.batch_size * args.nr_gpu
-data_set = load_data.CelebA(data_dir=args.data_dir, batch_size=batch_size, img_size=args.img_size)
+if 'celeba' in args.data_set:
+    data_set = load_data.CelebA(data_dir=args.data_dir, batch_size=batch_size, img_size=args.img_size)
+elif 'svhn' in args.data_set:
+    data_set = load_data.SVHN(data_dir=args.data_dir, batch_size=batch_size, img_size=args.img_size)
 if args.debug:
     train_data = data_set.train(shuffle=True, limit=batch_size*2)
     eval_data = data_set.train(shuffle=True, limit=batch_size*2)
-    test_data = data_set.test(shuffle=False, limit=batch_size*1)
+    test_data = data_set.test(shuffle=False, limit=-1)
 else:
     train_data = data_set.train(shuffle=True, limit=-1)
     eval_data = data_set.train(shuffle=True, limit=batch_size*10)
     test_data = data_set.test(shuffle=False, limit=-1)
 
 # masks
-if args.mask_type=="none":
+if "output" not in args.use_mask_for:
     masks = [None for i in range(args.nr_gpu)]
 else:
     masks = [tf.placeholder(tf.float32, shape=(args.batch_size, args.img_size, args.img_size)) for i in range(args.nr_gpu)]
-    if args.mask_type=="random rec":
-        train_mgen = RandomRectangleMaskGenerator(args.img_size, args.img_size, min_ratio=0.125, max_ratio=1.0)
-    elif args.mask_type=="full":
-        train_mgen = CenterMaskGenerator(args.img_size, args.img_size, ratio=1.0)
-    elif args.mask_type=="center rec":
-        train_mgen = CenterMaskGenerator(args.img_size, args.img_size, ratio=0.5)
-if "masked" in cfg and cfg['masked']:
-    test_mgen = CenterMaskGenerator(args.img_size, args.img_size, ratio=0.5)
+if "input" not in args.use_mask_for:
+    input_masks = [None for i in range(args.nr_gpu)]
 else:
-    test_mgen = CenterMaskGenerator(args.img_size, args.img_size, ratio=1.)
-
-
-input_masks = [None for i in range(args.nr_gpu)]
-input_mgen = RandomRectangleMaskGenerator(args.img_size, args.img_size, min_ratio=1./16, max_ratio=.75)
-input_test_mgen = RectangleMaskGenerator(args.img_size, args.img_size, rec=[8, 31, 18, 1])
-if "use_input_masks" in cfg and cfg["use_input_masks"]:
     input_masks = [tf.placeholder(tf.float32, shape=(args.batch_size, args.img_size, args.img_size)) for i in range(args.nr_gpu)]
 
 xs = [tf.placeholder(tf.float32, shape=(args.batch_size, args.img_size, args.img_size, 3)) for i in range(args.nr_gpu)]
@@ -368,9 +331,11 @@ x_bars = [tf.placeholder(tf.float32, shape=(args.batch_size, args.img_size, args
 is_trainings = [tf.placeholder(tf.bool, shape=()) for i in range(args.nr_gpu)]
 dropout_ps = [tf.placeholder(tf.float32, shape=()) for i in range(args.nr_gpu)]
 
+random_indices = [tf.placeholder_with_default(np.zeros((args.batch_size, args.z_dim), dtype=np.int32), shape=(args.batch_size, args.z_dim)) for i in range(args.nr_gpu)] ###
+
 pvaes = [ConvPixelVAE(counters={}) for i in range(args.nr_gpu)]
 model_opt = {
-    "use_mode": args.use_mode,
+    "use_mode": args.mode,
     "z_dim": args.z_dim,
     "reg": args.reg,
     "beta": args.beta,
@@ -384,7 +349,7 @@ model_opt = {
     "nr_filters": args.nr_filters,
     "nr_logistic_mix": args.nr_logistic_mix,
     "sample_range": args.sample_range,
-    "network_size": cfg['network_size'],
+    "network_size": args.network_size,
 }
 
 
@@ -392,12 +357,12 @@ model = tf.make_template('model', ConvPixelVAE.build_graph)
 
 for i in range(args.nr_gpu):
     with tf.device('/gpu:%d' % i):
-        model(pvaes[i], xs[i], x_bars[i], is_trainings[i], dropout_ps[i], masks=masks[i], input_masks=input_masks[i], **model_opt)
+        model(pvaes[i], xs[i], x_bars[i], is_trainings[i], dropout_ps[i], masks=masks[i], input_masks=input_masks[i], random_indices=random_indices[i], **model_opt)
 
-if args.use_mode == 'train':
-    if "masked" in cfg and cfg['masked']:
+if args.mode == 'train':
+    if args.phase=='ce':
         all_params = get_trainable_variables(["conv_pixel_cnn", "context_encoder"])
-    else:
+    elif args.phase=='pvae':
         all_params = get_trainable_variables(["conv_encoder", "conv_decoder", "conv_pixel_cnn"])
     grads = []
     for i in range(args.nr_gpu):
@@ -415,6 +380,10 @@ if args.use_mode == 'train':
             record_dict['mi reg'] = tf.add_n([v.mi for v in pvaes]) / args.nr_gpu
             record_dict['tc reg'] = tf.add_n([v.tc for v in pvaes]) / args.nr_gpu
             record_dict['dwkld reg'] = tf.add_n([v.dwkld for v in pvaes]) / args.nr_gpu
+        if args.reg=='info-tc':
+            record_dict['mi reg'] = tf.add_n([v.mi for v in pvaes]) / args.nr_gpu
+            record_dict['tc reg'] = tf.add_n([v.tc for v in pvaes]) / args.nr_gpu
+            record_dict['dwkld reg'] = tf.add_n([v.dwkld for v in pvaes]) / args.nr_gpu
         elif args.reg=='mmd':
             record_dict['mmd'] = tf.add_n([v.mmd for v in pvaes]) / args.nr_gpu
         elif args.reg=='kld':
@@ -424,41 +393,52 @@ if args.use_mode == 'train':
             record_dict['dwmmd'] = tf.add_n([v.dwmmd for v in pvaes]) / args.nr_gpu
         elif args.reg=='mmd-tc':
             record_dict['mmd'] = tf.add_n([v.mmd for v in pvaes]) / args.nr_gpu
-            record_dict['tc'] = tf.add_n([v.tc for v in pvaes]) / args.nr_gpu
+            record_dict['mmdtc'] = tf.add_n([v.mmdtc for v in pvaes]) / args.nr_gpu
         else:
             raise Exception("unknown reg type")
         recorder = Recorder(dict=record_dict, config_str=str(json.dumps(vars(args), indent=4, separators=(',',':'))), log_file=args.save_dir+"/log_file")
         train_step = adam_updates(all_params, grads[0], lr=args.learning_rate)
 
 
+def generate_random_indices(batch_size, z_dim):
+    return np.stack([np.random.permutation(np.arange(batch_size)) for i in range(z_dim)], axis=1)
 
 def make_feed_dict(data, is_training=True, dropout_p=0.5, mgen=None):
     if mgen is None:
-        mgen = train_mgen
+        mgen = get_generator('random rec', args.img_size)
     data = np.cast[np.float32]((data - 127.5) / 127.5)
     ds = np.split(data, args.nr_gpu)
     feed_dict = {is_trainings[i]: is_training for i in range(args.nr_gpu)}
     feed_dict.update({dropout_ps[i]: dropout_p for i in range(args.nr_gpu)})
     feed_dict.update({ xs[i]:ds[i] for i in range(args.nr_gpu) })
     feed_dict.update({ x_bars[i]:ds[i] for i in range(args.nr_gpu) })
-    if masks[0] is not None:
-        feed_dict.update({masks[i]:mgen.gen(args.batch_size) for i in range(args.nr_gpu)})
-    if input_masks[0] is not None:
-        feed_dict.update({input_masks[i]:input_mgen.gen(args.batch_size) for i in range(args.nr_gpu)})
+    feed_dict.update({ random_indices[i]:generate_random_indices(args.batch_size, args.z_dim) for i in range(args.nr_gpu) })
+    masks_np = [mgen.gen(args.batch_size) for i in range(args.nr_gpu)]
+    if "output" in args.use_mask_for:
+        if args.phase=='pvae':
+            feed_dict.update({masks[i]:np.zeros_like(masks_np[i]) for i in range(args.nr_gpu)})
+        elif args.phase=='ce':
+            feed_dict.update({masks[i]:masks_np[i] for i in range(args.nr_gpu)})
+    if "input" in args.use_mask_for:
+        feed_dict.update({input_masks[i]:masks_np[i] for i in range(args.nr_gpu)})
     return feed_dict
 
 def sample_from_model(sess, data, fill_region=None, mgen=None):
     if mgen is None:
-        mgen = test_mgen
+        mgen = get_generator('random_rec', args.img_size)
     data = np.cast[np.float32]((data - 127.5) / 127.5)
     ds = np.split(data, args.nr_gpu)
     feed_dict = {is_trainings[i]: False for i in range(args.nr_gpu)}
     feed_dict.update({dropout_ps[i]: 0. for i in range(args.nr_gpu)})
     feed_dict.update({ xs[i]:ds[i] for i in range(args.nr_gpu) })
-    if masks[0] is not None:
-        feed_dict.update({masks[i]:mgen.gen(args.batch_size) for i in range(args.nr_gpu)})
-    if input_masks[0] is not None:
-        feed_dict.update({input_masks[i]:input_test_mgen.gen(args.batch_size) for i in range(args.nr_gpu)})
+    masks_np = [mgen.gen(args.batch_size) for i in range(args.nr_gpu)]
+    if "output" in args.use_mask_for:
+        if args.phase=='pvae':
+            feed_dict.update({masks[i]:np.zeros_like(masks_np[i]) for i in range(args.nr_gpu)})
+        elif args.phase=='ce':
+            feed_dict.update({masks[i]:masks_np[i] for i in range(args.nr_gpu)})
+    if "input" in args.use_mask_for:
+        feed_dict.update({input_masks[i]:masks_np[i] for i in range(args.nr_gpu)})
 
     x_gen = [ds[i].copy() for i in range(args.nr_gpu)]
     #x_gen = [x_gen[i]*np.stack([tm for t in range(3)], axis=-1) for i in range(args.nr_gpu)]
@@ -472,15 +452,19 @@ def sample_from_model(sess, data, fill_region=None, mgen=None):
     return np.concatenate(x_gen, axis=0)
 
 def generate_samples(sess, data, fill_region=None, mgen=None):
-    if mgen is None:
-        mgen = test_mgen
     data = np.cast[np.float32]((data - 127.5) / 127.5)
     ds = np.split(data, args.nr_gpu)
     feed_dict = {is_trainings[i]:False for i in range(args.nr_gpu)}
     feed_dict.update({dropout_ps[i]: 0. for i in range(args.nr_gpu)})
     feed_dict.update({xs[i]:ds[i] for i in range(args.nr_gpu)})
-    if input_masks[0] is not None:
-        feed_dict.update({input_masks[i]:input_test_mgen.gen(args.batch_size) for i in range(args.nr_gpu)})
+    masks_np = [mgen.gen(args.batch_size) for i in range(args.nr_gpu)]
+    if "output" in args.use_mask_for:
+        if args.phase=='pvae':
+            feed_dict.update({masks[i]:np.zeros_like(masks_np[i]) for i in range(args.nr_gpu)})
+        elif args.phase=='ce':
+            feed_dict.update({masks[i]:masks_np[i] for i in range(args.nr_gpu)})
+    if "input" in args.use_mask_for:
+        feed_dict.update({input_masks[i]:masks_np[i] for i in range(args.nr_gpu)})
     z_mu = np.concatenate(sess.run([pvaes[i].z_mu for i in range(args.nr_gpu)], feed_dict=feed_dict), axis=0)
     z_log_sigma_sq = np.concatenate(sess.run([pvaes[i].z_log_sigma_sq for i in range(args.nr_gpu)], feed_dict=feed_dict), axis=0)
     z_sigma = np.sqrt(np.exp(z_log_sigma_sq))
@@ -488,10 +472,6 @@ def generate_samples(sess, data, fill_region=None, mgen=None):
     #z[:, 1] = np.linspace(start=-5., stop=5., num=z.shape[0])
     z = np.split(z, args.nr_gpu)
     feed_dict.update({pvaes[i].z:z[i] for i in range(args.nr_gpu)})
-
-    if masks[0] is not None:
-        feed_dict.update({masks[i]:mgen.gen(args.batch_size) for i in range(args.nr_gpu)})
-
 
     x_gen = [ds[i].copy() for i in range(args.nr_gpu)]
     #x_gen = [x_gen[i]*np.stack([tm for t in range(3)], axis=-1) for i in range(args.nr_gpu)]
@@ -507,8 +487,6 @@ def generate_samples(sess, data, fill_region=None, mgen=None):
     return np.concatenate(x_gen, axis=0)
 
 def latent_traversal(sess, image, traversal_range=[-6, 6], num_traversal_step=13, fill_region=None, mgen=None):
-    if mgen is None:
-        mgen = test_mgen
     image = np.cast[np.float32]((image - 127.5) / 127.5)
     num_instances = num_traversal_step * args.z_dim
     assert num_instances <= args.nr_gpu * args.batch_size, "cannot feed all the instances into GPUs"
@@ -517,8 +495,14 @@ def latent_traversal(sess, image, traversal_range=[-6, 6], num_traversal_step=13
     feed_dict = {is_trainings[i]:False for i in range(args.nr_gpu)}
     feed_dict.update({dropout_ps[i]: 0. for i in range(args.nr_gpu)})
     feed_dict.update({xs[i]:ds[i] for i in range(args.nr_gpu)})
-    if input_masks[0] is not None:
-        feed_dict.update({input_masks[i]:input_test_mgen.gen(args.batch_size) for i in range(args.nr_gpu)})
+    masks_np = [mgen.gen(args.batch_size) for i in range(args.nr_gpu)]
+    if "output" in args.use_mask_for:
+        if args.phase=='pvae':
+            feed_dict.update({masks[i]:np.zeros_like(masks_np[i]) for i in range(args.nr_gpu)})
+        elif args.phase=='ce':
+            feed_dict.update({masks[i]:masks_np[i] for i in range(args.nr_gpu)})
+    if "input" in args.use_mask_for:
+        feed_dict.update({input_masks[i]:masks_np[i] for i in range(args.nr_gpu)})
     z_mu = np.concatenate(sess.run([pvaes[i].z_mu for i in range(args.nr_gpu)], feed_dict=feed_dict), axis=0)
     z_log_sigma_sq = np.concatenate(sess.run([pvaes[i].z_log_sigma_sq for i in range(args.nr_gpu)], feed_dict=feed_dict), axis=0)
     z_sigma = np.sqrt(np.exp(z_log_sigma_sq))
@@ -529,10 +513,6 @@ def latent_traversal(sess, image, traversal_range=[-6, 6], num_traversal_step=13
         z[i*num_traversal_step:(i+1)*num_traversal_step, i] = np.linspace(start=traversal_range[0], stop=traversal_range[1], num=num_traversal_step)
     z = np.split(z, args.nr_gpu)
     feed_dict.update({pvaes[i].z:z[i] for i in range(args.nr_gpu)})
-
-    if masks[0] is not None:
-        feed_dict.update({masks[i]:mgen.gen(args.batch_size) for i in range(args.nr_gpu)})
-
 
     x_gen = [ds[i].copy() for i in range(args.nr_gpu)]
     #x_gen = [x_gen[i]*np.stack([tm for t in range(3)], axis=-1) for i in range(args.nr_gpu)]
@@ -560,16 +540,19 @@ with tf.Session(config=config) as sess:
         print('restoring parameters from', ckpt_file)
         saver.restore(sess, ckpt_file)
 
-    ## restore part of parameters
-    # var_list = get_trainable_variables(["conv_encoder", "conv_decoder", "conv_pixel_cnn"])
-    # pretraining_dir = "/data/ziz/jxu/models/pvae_celeba32_z32_mmd_large1"
-    # saver1 = tf.train.Saver(var_list=var_list)
-    # ckpt_file = pretraining_dir + '/params_' + args.data_set + '.ckpt'
-    # print('restoring parameters from', ckpt_file)
-    # saver1.restore(sess, ckpt_file)
+    if args.phase=='ce':
+        # restore part of parameters
+        var_list = get_trainable_variables(["conv_encoder", "conv_decoder", "conv_pixel_cnn"])
+        saver1 = tf.train.Saver(var_list=var_list)
+        ckpt_file = args.load_dir + '/params_' + args.data_set + '.ckpt'
+        print('restoring parameters from', ckpt_file)
+        saver1.restore(sess, ckpt_file)
 
-    # fill_region = CenterMaskGenerator(args.img_size, args.img_size, ratio=0.5).gen(1)[0]
-    fill_region = CenterMaskGenerator(args.img_size, args.img_size, ratio=1.0).gen(1)[0]
+    sample_mgen = get_generator('center', args.img_size)
+    if args.phase=='pvae':
+        fill_region = get_generator('full', args.img_size).gen(1)[0]
+    elif args.phase=='ce':
+        fill_region = sample_mgen.gen(1)[0]
 
     max_num_epoch = 200
     for epoch in range(max_num_epoch+1):
@@ -588,8 +571,7 @@ with tf.Session(config=config) as sess:
             saver.save(sess, args.save_dir + '/params_' + args.data_set + '.ckpt')
             data = next(test_data)
             test_data.reset()
-            #data = next(eval_data)
-            sample_x = sample_from_model(sess, data, fill_region=fill_region)
-            visualize_samples(sample_x, os.path.join(args.save_dir,'%s_vae_sample%d.png' % (args.data_set, epoch)), layout=(4, 4))
+            sample_x = sample_from_model(sess, data, fill_region=fill_region, mgen=sample_mgen)
+            visualize_samples(sample_x, os.path.join(args.save_dir,'%s_sample%d.png' % (args.data_set, epoch)), layout=(4, 4))
             print("------------ saved")
             sys.stdout.flush()

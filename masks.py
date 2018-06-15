@@ -39,6 +39,22 @@ class RectangleMaskGenerator(MaskGenerator):
         self.masks[:, top:bottom, left:right] = 0
         return self.masks
 
+class MultiRectangleMaskGenerator(MaskGenerator):
+
+    def __init__(self, height, width,  recs=None):
+        super().__init__(height, width)
+        if recs is None:
+            rec = int(0.25*self.height), int(0.75*self.width), int(0.75*self.height), int(0.25*self.width)
+            recs = [rec]
+        self.recs = recs
+
+    def gen(self, n):
+        self.masks = np.ones((n, self.height, self.width))
+        for rec in self.recs:
+            top, right, bottom, left = rec
+            self.masks[:, top:bottom, left:right] = 0
+        return self.masks
+
 
 class RandomRectangleMaskGenerator(MaskGenerator):
 
@@ -69,6 +85,34 @@ class RandomRectangleMaskGenerator(MaskGenerator):
         return self.masks
 
 
+
+
+
+def get_generator(name, size):
+    if name=='full':
+        return CenterMaskGenerator(size, size, ratio=1.0)
+    elif name=='transparent':
+        return CenterMaskGenerator(size, size, ratio=0.0)
+    elif name=='center':
+        return CenterMaskGenerator(size, size, ratio=0.5)
+    elif name=='eye':
+        return RectangleMaskGenerator(size, size, rec=[9, 27, 21, 5])
+    elif name=='mouth':
+        return RectangleMaskGenerator(size, size, rec=[22, 28, 32, 4])
+        # return RectangleMaskGenerator(size, size, rec=[22, 32, 32, 0])
+    elif name=='nose':
+        return RectangleMaskGenerator(size, size, rec=[18, 21, 27, 11])
+    elif name=='hair':
+        return RectangleMaskGenerator(size, size, rec=[0,32,12,0])
+        # return MultiRectangleMaskGenerator(size, size, recs=[[0,32,10,0], [0,9,32,0], [0,23,32,32]])
+    elif name=='face':
+        return RectangleMaskGenerator(size, size, rec=[8, 24, 32, 8])
+    elif name=='bottom half':
+        return RectangleMaskGenerator(size, size, rec=[16, 32, 32, 0])
+    elif name=='bottom quarter':
+        return RectangleMaskGenerator(size, size, rec=[24, 32, 32, 0])
+    elif name=='random rec':
+        return RandomRectangleMaskGenerator(size, size, min_ratio=1./8, max_ratio=(1.-1./8))
 
 
 
