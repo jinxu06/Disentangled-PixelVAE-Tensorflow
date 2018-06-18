@@ -32,6 +32,10 @@ def use_dataset(cfg, dataset, size):
         cfg.update({
             "data_dir": "/data/ziz/not-backed-up/jxu/SVHN",
         })
+    elif "cifar10" in dataset:
+        cfg.update({
+            "data_dir": "/data/ziz/not-backed-up/jxu/cifar10",
+        })
     return cfg
 
 def get_save_dir(cfg, name=None, suffix="_"):
