@@ -8,16 +8,17 @@ import tensorflow as tf
 from blocks.helpers import Recorder, visualize_samples, get_nonlinearity, int_shape, get_trainable_variables
 from blocks.optimizers import adam_updates
 import data.load_data as load_data
-from models.conv_pixel_vae import ConvPixelVAE
+from models.conv_pixelvae import ConvPixelVAE
 from masks import RandomRectangleMaskGenerator, RectangleMaskGenerator, CenterMaskGenerator, get_generator
 from configs import get_config
 
 parser = argparse.ArgumentParser()
 
+# default setting
 cfg_default = {
     "img_size": 32,
-    "data_dir": "/data/ziz/not-backed-up/jxu/CelebA",
-    "data_set": "celeba64",
+    "data_dir": "/data/ziz/not-backed-up/jxu/cifar",
+    "data_set": "cifar10",
     "nonlinearity":"relu",
     "batch_size": 32,
     "learning_rate": 0.0001,
@@ -31,7 +32,7 @@ cfg_default = {
 
 # kld, large network, bn before nonlinearity nr_resnet 5
 config = {"nonlinearity": "elu", "network_size":"large", "beta":1.0, "nr_resnet":5, "reg":"kld"}
-cfg = get_config(config=config, name=None, suffix="_test", load_dir=None, dataset='celeba', size=32, mode='train', phase='pvae', use_mask_for="none")
+cfg = get_config(config=config, name="cifar10-test", suffix="", load_dir=None, dataset='cifar10', size=32, mode='train', phase='pvae', use_mask_for="none")
 
 
 parser.add_argument('-is', '--img_size', type=int, default=cfg['img_size'], help="size of input image")
