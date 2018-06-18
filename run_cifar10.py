@@ -88,8 +88,8 @@ if args.debug:
     test_data = data_set.test(shuffle=False, limit=-1)
 else:
     train_data = data_set.train(shuffle=True, limit=-1)
-    eval_data = test_data #data_set.train(shuffle=True, limit=batch_size*10)
-    test_data = data_set.test(shuffle=False, limit=-1)
+    eval_data = data_set.test(shuffle=False, limit=-1)
+    test_data = eval_data 
 
 # masks
 if "output" not in args.use_mask_for:
