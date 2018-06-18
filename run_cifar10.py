@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser()
 # default setting
 cfg_default = {
     "img_size": 32,
-    "data_dir": "/data/ziz/not-backed-up/jxu/cifar10",
+    "data_dir": "/data/ziz/not-backed-up/datasets-ziz-only/raw_data/cifar10",
     "data_set": "cifar10",
     "nonlinearity":"relu",
     "batch_size": 32,
@@ -89,7 +89,7 @@ if args.debug:
 else:
     train_data = data_set.train(shuffle=True, limit=-1)
     eval_data = data_set.test(shuffle=False, limit=-1)
-    test_data = eval_data 
+    test_data = eval_data
 
 # masks
 if "output" not in args.use_mask_for:
