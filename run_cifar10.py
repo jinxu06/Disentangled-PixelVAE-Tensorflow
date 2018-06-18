@@ -80,6 +80,8 @@ if 'celeba' in args.data_set:
     data_set = load_data.CelebA(data_dir=args.data_dir, batch_size=batch_size, img_size=args.img_size)
 elif 'svhn' in args.data_set:
     data_set = load_data.SVHN(data_dir=args.data_dir, batch_size=batch_size, img_size=args.img_size)
+elif 'cifar10' in args.data_set:
+    data_set = load_data.CIFAR10(data_dir=args.data_dir, batch_size=batch_size, img_size=args.img_size)
 if args.debug:
     train_data = data_set.train(shuffle=True, limit=batch_size*2)
     eval_data = data_set.train(shuffle=True, limit=batch_size*2)
