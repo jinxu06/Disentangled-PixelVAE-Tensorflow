@@ -44,7 +44,7 @@ class SVHN(DataSet):
                 rng=self.rng, shuffle=shuffle, size=self.img_size, limit=limit)
 
 
-class Cifar10(DataSet):
+class CIFAR10(DataSet):
 
     def __init__(self, data_dir, batch_size, img_size, rng=np.random.RandomState(None)):
         self.data_dir = data_dir
