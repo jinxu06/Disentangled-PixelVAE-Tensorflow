@@ -37,28 +37,27 @@ def unpickle(file):
     fo.close()
     return {'x': d['data'].reshape((10000,3,32,32)), 'y': np.array(d['labels']).astype(np.uint8)}
 
-def load(data_dir, subset='train'):
-    maybe_download_and_extract(data_dir)
-    if subset == 'valid':
-        print("no valid dataset, change to test")
-        subset = 'test'
-    if subset=='train':
-        train_data = [unpickle(os.path.join(data_dir,'cifar-10-batches-py','data_batch_' + str(i))) for i in range(1,6)]
-        trainx = np.concatenate([d['x'] for d in train_data],axis=0)
-        trainy = np.concatenate([d['y'] for d in train_data],axis=0)
-        return trainx, trainy
-    elif subset=='test':
-        test_data = unpickle(os.path.join(data_dir,'cifar-10-batches-py','test_batch'))
-        testx = test_data['x']
-        testy = test_data['y']
-        return testx, testy
+def load(data_dir, subset='train', size=64, limit=-1):
+    if limit != -1:
+        raise Exception("limit not implemented")
+    if subset in ['train', 'test']:
+        if subset == 'train':
+            train_data = [unpickle(os.path.join(data_dir,'cifar-10-batches-py','data_batch_' + str(i))) for i in range(1,6)]
+            trainx = np.concatenate([d['x'] for d in train_data],axis=0)
+            trainy = np.concatenate([d['y'] for d in train_data],axis=0)
+            return trainx, trainy
+        elif subset == 'test':
+            test_data = unpickle(os.path.join(data_dir,'cifar-10-batches-py','test_batch'))
+            testx = test_data['x']
+            testy = test_data['y']
+            return testx, testy
     else:
-        raise NotImplementedError('subset should be either train or test')
+        raise NotImplementedError('subset should be either train, valid or test')
 
 class DataLoader(object):
     """ an object that generates batches of CIFAR-10 data for training """
 
-    def __init__(self, data_dir, subset, batch_size, rng=None, shuffle=False, return_labels=False, size=32):
+    def __init__(self, data_dir, subset, batch_size, rng=None, shuffle=False, return_labels=False, size=32, limit=-1):
         """
         - data_dir is location where to store files
         - subset is train|test
@@ -76,8 +75,7 @@ class DataLoader(object):
             print('creating folder', data_dir)
             os.makedirs(data_dir)
 
-        # load CIFAR-10 training data to RAM
-        self.data, self.labels = load(os.path.join(data_dir,'cifar-10-python'), subset=subset)
+        self.data, self.labels = load(os.path.join(data_dir,'cifar-10-python'), subset=subset, size=size, limit=limit)
         self.data = np.transpose(self.data, (0,2,3,1)) # (N,3,32,32) -> (N,32,32,3)
 
         self.p = 0 # pointer to where we are in iteration

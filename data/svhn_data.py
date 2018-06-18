@@ -51,7 +51,6 @@ class DataLoader(object):
             print('creating folder', data_dir)
             os.makedirs(data_dir)
 
-        # load CIFAR-10 training data to RAM
         self.data, self.labels = load(self.data_dir, subset=subset, size=size, limit=limit)
         # self.data = np.transpose(self.data, (0,2,3,1)) # (N,3,32,32) -> (N,32,32,3)
 
