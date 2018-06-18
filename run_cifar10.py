@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser()
 # default setting
 cfg_default = {
     "img_size": 32,
-    "data_dir": "/data/ziz/not-backed-up/jxu/cifar",
+    "data_dir": "/data/ziz/not-backed-up/jxu/cifar10",
     "data_set": "cifar10",
     "nonlinearity":"relu",
     "batch_size": 32,
