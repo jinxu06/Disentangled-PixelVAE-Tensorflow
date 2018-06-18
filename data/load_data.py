@@ -57,7 +57,7 @@ class CIFAR10(DataSet):
                 rng=self.rng, shuffle=shuffle, size=self.img_size, limit=limit)
 
     def test(self, shuffle=False, limit=-1):
-        return cifar10_data.DataLoader(self.data_dir, 'valid', self.batch_size,
+        return cifar10_data.DataLoader(self.data_dir, 'test', self.batch_size,
                 rng=self.rng, shuffle=shuffle, size=self.img_size, limit=limit)
 
 
